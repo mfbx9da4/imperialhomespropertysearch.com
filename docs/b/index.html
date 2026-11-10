@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Your property search brief | Imperial Homes Property Search</title>
+  <style>
+    :root {
+      --navy: #002366;
+      --cream: #fdfbd4;
+      --ink: #1f2430;
+      --muted: #5c6370;
+      --line: #dfe3ea;
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --error: #b42318;
+      --ok: #1d7a46;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.6 Inter, Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    /* The site logo is white, so the header is navy like the main site. */
+    header { background: var(--navy); }
+    header .inner { max-width: 760px; margin: 0 auto; padding: 18px 16px; }
+    header img { display: block; width: 100%; max-width: 320px; height: auto; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 28px; }
+    h1 { color: var(--navy); font-size: 1.5rem; line-height: 1.3; margin: 0 0 16px; }
+    h2 { color: var(--navy); font-size: 1.1rem; margin: 32px 0 10px; }
+    .letter, .brief, .terms { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .brief { background: var(--cream); border-radius: 8px; padding: 16px 18px; }
+    .terms {
+      max-height: 340px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px;
+      padding: 16px 18px; font-size: 0.92rem; background: #fafbfc;
+    }
+    .fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .fee { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+    .fee .label { color: var(--muted); font-size: 0.85rem; }
+    .fee .value { color: var(--navy); font-size: 1.15rem; font-weight: 600; overflow-wrap: anywhere; }
+    form { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; }
+    label.field { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type=text] {
+      width: 100%; font: inherit; padding: 12px 14px; border: 1px solid #b9c0cc; border-radius: 8px;
+    }
+    input[type=text]:focus, input[type=checkbox]:focus-visible, button:focus-visible {
+      outline: 3px solid rgba(0, 35, 102, 0.3); outline-offset: 1px;
+    }
+    .check { display: flex; gap: 12px; align-items: flex-start; margin: 18px 0; cursor: pointer; }
+    .check input { width: 20px; height: 20px; margin-top: 3px; flex: none; }
+    button {
+      font: inherit; font-weight: 600; color: #fff; background: var(--navy); border: 0; border-radius: 8px;
+      padding: 13px 28px; cursor: pointer; width: 100%;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .error { color: var(--error); margin: 12px 0 0; }
+    .notice { text-align: center; padding: 24px 8px; }
+    .notice .big { font-size: 2.4rem; line-height: 1; margin-bottom: 12px; }
+    .done { color: var(--ok); }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 24px; }
+    footer a { color: var(--navy); }
+    .preview-banner {
+      background: var(--cream); border: 1px solid #e8e3a6; border-radius: 8px;
+      padding: 10px 14px; margin: 0 0 20px; font-weight: 600; color: var(--navy);
+    }
+    input:disabled { background: #f0f1f3; }
+    [hidden] { display: none !important; }
+    @media (min-width: 560px) { button { width: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <a href="/"><img src="../wp-content/uploads/2025/06/New-Project-2025-06-12T110002.033.png"
+        alt="Imperial Homes Property Search" width="550" height="79"></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div id="loading" class="notice"><p class="muted">Loading your brief...</p></div>
+
+      <div id="message" class="notice" hidden>
+        <div class="big" id="message-icon"></div>
+        <h1 id="message-title"></h1>
+        <p id="message-text"></p>
+      </div>
+
+      <div id="agreement" hidden>
+        <p class="preview-banner" id="preview-banner" hidden>
+          Preview only. This is what the client will see. It can be accepted after you send it.
+        </p>
+        <h1>Your property search brief</h1>
+        <div class="letter" id="letter"></div>
+
+        <h2>Property search brief</h2>
+        <div class="brief" id="brief"></div>
+
+        <h2>Fees</h2>
+        <div class="fees">
+          <div class="fee"><div class="label">Success fee</div><div class="value" id="success-fee"></div></div>
+          <div class="fee"><div class="label">Deposit</div><div class="value" id="deposit"></div></div>
+        </div>
+
+        <h2>Terms and conditions</h2>
+        <div class="terms" id="terms" tabindex="0" aria-label="Terms and conditions"></div>
+        <p class="muted" id="terms-version"></p>
+
+        <form id="accept-form" novalidate>
+          <label class="field" for="name">Your full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" maxlength="120" required>
+          <label class="check">
+            <input type="checkbox" id="agree">
+            <span>I have read and agree to the property search brief, the fees and the terms and conditions above.</span>
+          </label>
+          <button type="submit" id="accept">Accept</button>
+          <p class="error" id="form-error" role="alert" hidden></p>
+        </form>
+      </div>
+    </div>
+    <footer>
+      Questions? Contact <a href="mailto:imperialhomes@btinternet.com">imperialhomes@btinternet.com</a>
+    </footer>
+  </main>
+
+  <script>
+    // Google Apps Script web app URL (Deploy > Manage deployments > Web app URL).
+    var API_URL = 'https://script.google.com/macros/s/AKfycbwvkZlBfjYX1dpSLkPJtDQChzR_xsXO-ngRWiadpIMH_XR2Uk23tq3eFRVcZz2zX9q6/exec';
+    // Local testing only: the test harness in agreements/test serves the same API.
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      API_URL = 'http://127.0.0.1:18790/api';
+    }
+
+    var code = (location.search.slice(1).split('&')[0].split('=').pop() || '')
+      .toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    function $(id) { return document.getElementById(id); }
+
+    function show(id) {
+      ['loading', 'message', 'agreement'].forEach(function (x) { $(x).hidden = x !== id; });
+    }
+
+    function message(icon, title, text) {
+      $('message-icon').textContent = icon;
+      $('message-title').textContent = title;
+      $('message-text').textContent = text;
+      show('message');
+    }
+
+    function render(data) {
+      if (data.status === 'not_found') {
+        return message('?', 'Link not found',
+          'Please check you used the full link from your email or message, or contact Imperial Homes.');
+      }
+      if (data.status === 'cancelled') {
+        return message('!', 'This brief is no longer available',
+          'Imperial Homes may have sent you an updated link. Please contact us if you are unsure.');
+      }
+      if (data.status === 'accepted') {
+        $('message-icon').className = 'big done';
+        return message('✓', 'Thank you, your agreement is confirmed',
+          'Accepted by ' + data.acceptedName + ' on ' + data.acceptedAt +
+          ' (UK time). We have emailed you a copy, with the bank details to pay your deposit.');
+      }
+      if (data.status !== 'sent' && data.status !== 'viewed' && data.status !== 'draft') {
+        return message('!', 'Something went wrong', data.error || 'Please try again later.');
+      }
+      // Sophie's preview before sending: same page, but it cannot be accepted yet.
+      var draft = data.status === 'draft';
+      $('preview-banner').hidden = !draft;
+      ['name', 'agree', 'accept'].forEach(function (id) { $(id).disabled = draft; });
+      $('letter').textContent = data.letter;
+      $('brief').textContent = data.brief;
+      $('success-fee').textContent = data.successFee;
+      $('deposit').textContent = data.deposit;
+      $('terms').textContent = data.terms;
+      $('terms-version').textContent = 'Terms version ' + data.termsVersion;
+      show('agreement');
+    }
+
+    function load() {
+      if (!code) {
+        return render({ status: 'not_found' });
+      }
+      fetch(API_URL + '?code=' + encodeURIComponent(code))
+        .then(function (r) { return r.json(); })
+        .then(render)
+        .catch(function () {
+          message('!', 'Could not load your brief', 'Please check your connection and refresh the page.');
+        });
+    }
+
+    $('accept-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = $('name').value.trim();
+      var error = $('form-error');
+      error.hidden = true;
+      if (!name) {
+        error.textContent = 'Please type your full name.';
+        error.hidden = false;
+        $('name').focus();
+        return;
+      }
+      if (!$('agree').checked) {
+        error.textContent = 'Please tick the box to confirm you agree.';
+        error.hidden = false;
+        return;
+      }
+      $('accept').disabled = true;
+      $('accept').textContent = 'Saving...';
+      // text/plain keeps this a "simple" request, which Apps Script accepts cross-origin.
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ code: code, name: name, agree: true, browser: navigator.userAgent }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.status === 'error') {
+            error.textContent = data.error;
+            error.hidden = false;
+            $('accept').disabled = false;
+            $('accept').textContent = 'Accept';
+            return;
+          }
+          window.scrollTo(0, 0);
+          render(data);
+        })
+        .catch(function () {
+          error.textContent = 'Could not save. Please check your connection and try again.';
+          error.hidden = false;
+          $('accept').disabled = false;
+          $('accept').textContent = 'Accept';
+        });
+    });
+
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+name = "imperial-homes-mailer"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SMTP_HOST = "mail.btinternet.com"
+SMTP_PORT = "587" # 465 times out from Cloudflare; 587 (STARTTLS) works
+SMTP_USER = "imperialhomes@btinternet.com"
+FROM_NAME = "Imperial Homes Property Search"
+
+# Secrets (never in this file), set with `npx wrangler secret put <NAME>`:
+#   SMTP_PASS  the BT email password
+#   RELAY_KEY  a long random string, also saved in the Apps Script project

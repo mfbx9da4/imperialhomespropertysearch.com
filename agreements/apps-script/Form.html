@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base target="_top">
+  <style>
+    body { font: 14px/1.5 Arial, Helvetica, sans-serif; color: #1f2430; margin: 0; padding: 4px 6px 16px; }
+    label { display: block; font-weight: bold; margin: 12px 0 4px; }
+    .hint { font-weight: normal; color: #5c6370; font-size: 12px; }
+    input, textarea {
+      width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px;
+      border: 1px solid #b9c0cc; border-radius: 6px;
+    }
+    textarea { min-height: 220px; resize: vertical; }
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; min-width: 0; }
+    .copied { background: #fdfbd4; border-radius: 6px; padding: 8px 10px; margin: 4px 0 0; }
+    .buttons { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    button {
+      font: inherit; font-weight: bold; border-radius: 6px; padding: 9px 16px; cursor: pointer;
+      border: 1px solid #002366; background: #fff; color: #002366;
+    }
+    button.primary { background: #002366; color: #fff; }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .error { color: #b42318; margin-top: 12px; white-space: pre-wrap; }
+    .done h3 { color: #002366; margin: 8px 0; }
+    .link { display: flex; gap: 8px; margin: 8px 0 16px; }
+    .link input { flex: 1; }
+    a.button {
+      display: inline-block; font-weight: bold; text-decoration: none; border-radius: 6px; padding: 9px 16px;
+      border: 1px solid #002366; color: #002366;
+    }
+    a.whatsapp { background: #25d366; border-color: #25d366; color: #fff; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <form id="form" autocomplete="off">
+    <p class="copied" id="copied" hidden></p>
+    <div class="row">
+      <div>
+        <label for="clientName">Client name</label>
+        <input id="clientName" required>
+      </div>
+      <div>
+        <label for="phone">Mobile <span class="hint">(optional, for WhatsApp)</span></label>
+        <input id="phone" placeholder="e.g. 07700 900123">
+      </div>
+    </div>
+    <label for="email">Client email</label>
+    <input id="email" type="email" required>
+    <label for="brief">Property search brief <span class="hint">(the client sees exactly this)</span></label>
+    <textarea id="brief" required></textarea>
+    <div class="row">
+      <div>
+        <label for="successFee">Success fee</label>
+        <input id="successFee" placeholder="e.g. 1.5% + VAT of the purchase price" required>
+      </div>
+      <div>
+        <label for="deposit">Deposit</label>
+        <input id="deposit" placeholder="e.g. £1,500" required>
+      </div>
+    </div>
+    <div class="buttons">
+      <button type="button" class="primary" id="preview">Preview</button>
+      <button type="button" id="sendNow">Send now, without preview</button>
+    </div>
+    <p class="error" id="error" hidden></p>
+  </form>
+
+  <div class="done" id="draft" hidden>
+    <h3>Check the preview</h3>
+    <p>This is the page the client will see. Nothing has been sent yet.</p>
+    <p><a class="button" id="previewLink" target="_blank">Open preview</a></p>
+    <div class="buttons">
+      <button type="button" class="primary" id="sendDraft">Looks good, send to client</button>
+      <button type="button" id="close1">Close (keep as draft)</button>
+    </div>
+    <p class="hint">A draft stays on the Agreements tab. You can send it later with Imperial Homes &gt; Send agreement.</p>
+    <p class="error" id="error2" hidden></p>
+  </div>
+
+  <div class="done" id="sent" hidden>
+    <h3>Sent</h3>
+    <p id="sentTo"></p>
+    <label>Client link</label>
+    <div class="link">
+      <input id="link" readonly>
+      <button type="button" id="copyLink">Copy</button>
+    </div>
+    <label>WhatsApp message</label>
+    <textarea id="waText" readonly style="min-height: 90px"></textarea>
+    <div class="buttons">
+      <a class="button whatsapp" id="waLink" target="_blank">Send on WhatsApp</a>
+      <button type="button" id="copyWa">Copy message</button>
+      <button type="button" id="close2">Close</button>
+    </div>
+  </div>
+
+  <script>
+    var prefill = <?!= prefillJson ?>;
+    var draftCode = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    ['clientName', 'email', 'phone', 'brief', 'successFee', 'deposit'].forEach(function (k) {
+      $(k).value = prefill[k] || '';
+    });
+    if (prefill.copiedFrom) {
+      $('copied').textContent = 'Copied the brief, success fee and deposit from ' + prefill.copiedFrom +
+        '. Change what is different for this client.';
+      $('copied').hidden = false;
+    }
+    $('clientName').focus();
+
+    function values() {
+      return {
+        clientName: $('clientName').value, email: $('email').value, phone: $('phone').value,
+        brief: $('brief').value, successFee: $('successFee').value, deposit: $('deposit').value,
+      };
+    }
+
+    function busy(on) {
+      document.querySelectorAll('button').forEach(function (b) { b.disabled = on; });
+    }
+
+    function fail(id) {
+      return function (err) {
+        busy(false);
+        $(id).textContent = (err && err.message) || String(err);
+        $(id).hidden = false;
+      };
+    }
+
+    function showSent(r) {
+      busy(false);
+      $('form').hidden = true;
+      $('draft').hidden = true;
+      $('sentTo').textContent = 'The client email is on its way to ' + r.email + '.';
+      $('link').value = r.link;
+      $('waText').value = r.whatsappText;
+      $('waLink').href = r.whatsappUrl;
+      $('sent').hidden = false;
+    }
+
+    $('preview').onclick = function () {
+      $('error').hidden = true;
+      busy(true);
+      google.script.run.withSuccessHandler(function (r) {
+        busy(false);
+        draftCode = r.code;
+        $('previewLink').href = r.link;
+        $('form').hidden = true;
+        $('draft').hidden = false;
+        window.open(r.link, '_blank');
+      }).withFailureHandler(fail('error')).createAgreement(values(), false);
+    };
+
+    $('sendNow').onclick = function () {
+      $('error').hidden = true;
+      busy(true);
+      google.script.run.withSuccessHandler(showSent).withFailureHandler(fail('error')).createAgreement(values(), true);
+    };
+
+    $('sendDraft').onclick = function () {
+      $('error2').hidden = true;
+      busy(true);
+      google.script.run.withSuccessHandler(showSent).withFailureHandler(fail('error2')).sendDraft(draftCode);
+    };
+
+    function copy(id) {
+      $(id).select();
+      document.execCommand('copy');
+    }
+    $('copyLink').onclick = function () { copy('link'); };
+    $('copyWa').onclick = function () { copy('waText'); };
+    $('close1').onclick = $('close2').onclick = function () { google.script.host.close(); };
+  </script>
+</body>
+</html>
